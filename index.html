@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-3.6.0.min.js"></script>
+		<link rel="stylesheet" href="layui/css/layui.css">
+		<style>
+				#top {
+				        width: 1000px;
+				        height: 70px;
+				        margin:20px auto; 
+				    }
+				#tab {
+						text-indent: 20px;
+						width: 1000px;
+						height: 800px;
+						margin: auto;
+							          
+					}
+					a{
+						color: blue;
+					}
+		</style>
+	</head>
+	<body>
+    <div id="top" class="layui-row layui-col-space1">
+        <div class="layui-col-lg3">
+			学号：<input type="text" id="stuNo" class="layui-input" placeholder="请输入学号">
+			</div>
+        <div class="layui-col-lg3">
+			姓名：<input type="text" id="stuName" class="layui-input" placeholder="请输入姓名">
+			</div>
+        <div class="layui-col-lg3">
+			专业：<input type="text" id="stuMajor" class="layui-input" placeholder="请输入专业">
+			</div>
+        <div class="layui-col-lg3">
+			<input type="button" name="" id="button" class="layui-btn layui-btn-primary layui-border-black" value="确定">
+			</div>
+    </div>
+    <div id="tab">
+        <table id="table" class="layui-table" lay-even lay-skin="nob">
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>专业</th>
+                <th>操作</th>
+            </tr>
+        </table>
+    </div>
+	</body>
+	<script src="layui/layui.js"></script>
+	<script>
+	
+    $(function(){
+        $.get(
+            "http://120.46.143.125:8080/stu/list",
+            function(msg){
+                for(i=0;i<msg.data.length;i++){
+                    $("#table").append("<tr id='"+msg.data[i].stuId+"'><td>"+msg.data[i].stuNo+"</td><td>"+msg.data[i].stuName+"</td><td>"+msg.data[i].stuMajor+"</td><td><button type='button' id='update' class='layui-btn layui-btn-radius layui-btn-normal' onclick='update(this)' >修改</button><button type='button' id='delete' class='layui-btn layui-btn-radius layui-btn-normal' onclick='del(this)'>删除</button></td></tr>");
+                }
+            },"json"
+        )
+    });
+    $("#button").click(function(){
+        var student = {
+            "stuNo" : $("#stuNo").val(),
+            "stuName" : $("#stuName").val(),
+            "stuMajor" : $("#stuMajor").val(),
+        }
+        $.ajax({
+            type:"POST",
+            url:"http://120.46.143.125:8080/stu/insertStu",
+            dataType:"json",
+            data:{
+				stuNo : $("#stuNo").val(),
+				stuName : $("#stuName").val(),
+				stuMajor : $("#stuMajor").val(),
+			},
+            success:function(data){
+                if(data.msg=="成功"){
+                    $("#table").append("<tr id='"+data.data+"'><td>"+$("#stuNo").val()+"</td><td>"+$("#stuName").val()+"</td><td>"+$("#stuMajor").val()+"</td><td><button type='button' id='update' class='layui-btn layui-btn-radius layui-btn-normal' onclick='update(this)' >修改</button><button type='button' id='delete' class='layui-btn layui-btn-radius layui-btn-normal' onclick='del(this)'>删除</button></td></tr>");
+                }
+            }
+        })
+    });
+	function del(del){
+	            console.log(1);
+	            var id=$(del).parent().parent().attr("id");
+	            alert(id);
+	        $.ajax({
+	            type:"POST",
+	            url:"http://120.46.143.125:8080/stu/deleteStu/"+id,
+	            dataType:"json",
+	            data:JSON.stringify(id),
+	            success:function(data){
+	                if(data.msg=="成功"){
+	                    $(del).parent().parent().remove();
+	                }
+	            }
+	        })
+	    }
+	
+	    function update(update){
+	    			    var tr=$(update).parent().parent();
+	    	            var id=$(update).parent().parent().attr("id");
+	    				var row=tr.parent().children().index(tr);
+	    	        $("#button").click(function(){
+	    	        var student = {
+	    	            "stuNo" : $("#stuNo").val(),
+	    	            "stuName" : $("#stuName").val(),
+	    	            "stuMajor" : $("#stuMajor").val(),
+	    	        }
+	    	        $.ajax({
+	    	            type:"POST",
+	    	            url:"http://120.46.143.125:8080/stu/updateStu",
+	    	            dataType:"json",
+	    	            data:{
+	    					stuId: id,
+	    					stuNo: $("#stuNo").val(),
+	    					"stuName" : $("#stuName").val(),
+	    					"stuMajor" : $("#stuMajor").val(),
+	    				},
+	    	            success:function(data){
+	    	                if(data.msg=="成功"){
+	    	                     $("#table").find("tr").eq(row).find("td").eq(1).val($("#stuNo").val());
+	    	                    $("#table").find("tr").eq(row).find("td").eq(2).val($("#stuName").val());
+	    	                    $("#table").find("tr").eq(row).find("td").eq(3).val($("#stuMajor").val());
+	    	                    location.reload();
+	    	                }
+	    	            }
+	    	        })
+	    	    });
+	    	    }
+
+	</script>
+</html>
